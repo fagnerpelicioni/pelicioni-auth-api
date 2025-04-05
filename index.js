@@ -9,22 +9,32 @@ const linksRoutes = require('./routes/links');
 
 const connectDB = async () => {
     try {
-        mongoose.set('strictQuery', false)
-        mongoose.connect(process.env.MONGO_URI) 
-        console.log('Mongo connected')
-    } catch(error) {
-        console.log(error)
-        process.exit()
+        mongoose.set('strictQuery', false);
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('Mongo connected');
+    } catch (error) {
+        console.error('Database connection failed:', error);
+        process.exit(1); // Exit with failure
     }
-}
+};
 
 connectDB();
 
 app.use(express.json());
 
+// Routes
 app.use('/api/user', authRoutes);
 app.use('/api/', linksRoutes);
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+app.use('/health', (req, res) => {
+    res.status(200).json('OK');
 });
+
+// CORS Headers
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+// Export the serverless handler
+module.exports.handler = serverless(app);

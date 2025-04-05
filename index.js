@@ -25,7 +25,7 @@ app.use(express.json());
 // Routes
 app.use('/api/user', authRoutes);
 app.use('/api/', linksRoutes);
-app.use('/health', (req, res) => {
+app.use('/api/health', (req, res) => {
     res.status(200).json('OK');
 });
 
@@ -36,8 +36,18 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+});
+
 // Export the serverless handler
 module.exports = app;
 module.exports.handler = (event, context, callback) => {
     app(event, context, callback);
 };
+
+// Start the server if not in serverless mode
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server is running on port ${process.env.PORT || 3000}`);
+});

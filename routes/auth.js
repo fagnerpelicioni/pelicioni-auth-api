@@ -49,4 +49,8 @@ router.post('/login', async (req, res) => {
     });
 })
 
+router.post('/logout', (req, res) => {
+    res.header('auth-token', '').status(200).json({ message: 'Logout realizado com sucesso!' });
+})
+
 module.exports = router;

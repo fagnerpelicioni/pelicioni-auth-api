@@ -16,6 +16,7 @@ router.get('/links', verifyToken, async (req, res) => {
           id: usuario._id,
           name: usuario.name,
           email: usuario.email,
+          role: usuario.role,
           links
         });
       } catch (err) {

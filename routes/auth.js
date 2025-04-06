@@ -2,6 +2,8 @@ const router = require('express').Router();
 const User = require('../model/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const verifyToken = require('./verifyToken');
+
 const { registerValidation, loginValidation } = require('../validation');
 
 router.post('/register', async (req, res) => {
@@ -52,5 +54,17 @@ router.post('/login', async (req, res) => {
 router.post('/logout', (req, res) => {
     res.header('auth-token', '').status(200).json({ message: 'Logout realizado com sucesso!' });
 })
+
+router.get('/users', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem listar usuários.' });
+        }
+        const users = await User.find().lean();
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 module.exports = router;

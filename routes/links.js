@@ -2,6 +2,7 @@ const router = require('express').Router();
 const verifyToken = require('./verifyToken');
 const User = require('../model/User');
 const Link = require('../model/Links');
+const Company = require('../model/Company');
 
 router.get('/links', verifyToken, async (req, res) => {
     try {
@@ -9,18 +10,20 @@ router.get('/links', verifyToken, async (req, res) => {
         if (!usuario) {
           return res.status(401).json({ error: 'Não autorizado.' });
         }
-    
+
+        const company = await Company.findById(usuario.company).lean();
         const links = await Link.find({ userEmail: usuario.email }).lean();
     
-        res.json({
+        res.status(200).json({
           id: usuario._id,
           name: usuario.name,
           email: usuario.email,
           role: usuario.role,
+          company,
           links
         });
       } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ error: err.message });
       }
 });
 

@@ -42,7 +42,10 @@ router.post('/login', async (req, res) => {
     if (!emailExists) return res.status(400).json({ error: 'Email não encontrado!' });
 
     const validPassword = await bcrypt.compare(req.body.password, emailExists.password);
-    if (!validPassword) return res.status(400).json({ error: 'Senha inválida!' });	
+    if (!validPassword) return res.status(400).json({ error: 'Senha inválida!' });
+
+    const isActive = emailExists.active;
+    if (!isActive) return res.status(403).json({ error: 'Usuário inativo. Entre em contato com o administrador.' });
 
     const token = jwt.sign({ _id: emailExists._id, email: emailExists.email, role: emailExists.role }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
 

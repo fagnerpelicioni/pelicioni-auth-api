@@ -21,6 +21,8 @@ router.post('/register', async (req, res) => {
         email: req.body.email,
         password: hashedPassword,
         role: req.body.role || 'user',
+        company: req.body.company || null,
+        active: req.body.active !== undefined ? req.body.active : true,
     });
 
     try {
@@ -63,8 +65,40 @@ router.get('/users', verifyToken, async (req, res) => {
         const users = await User.find().lean();
         res.json(users);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ error: err.message });
     }
 });
+
+router.put('/users/:id', verifyToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, email, password, active, company } = req.body;
+
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem atualizar usuários.' });
+        }
+
+        const user = await User.findOne({ _id: id });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        user.name = name || user.name;
+        user.email = req.body.email || user.email;
+        user.company = company || user.company;
+        user.active = active !== undefined ? active : user.active;
+
+        await user.save();
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 
 module.exports = router;

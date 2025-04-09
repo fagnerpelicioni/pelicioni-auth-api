@@ -9,6 +9,7 @@ app.use(cors());
 dotenv.config();
 const authRoutes = require('./routes/auth');
 const linksRoutes = require('./routes/links');
+const companyRoutes = require('./routes/company');
 
 const connectDB = async () => {
     try {
@@ -28,6 +29,7 @@ app.use(express.json());
 // Routes
 app.use('/api/user', authRoutes);
 app.use('/api/', linksRoutes);
+app.use('/api/company', companyRoutes);
 app.use('/api/health', (req, res) => {
     res.status(200).json('OK');
 });

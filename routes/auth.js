@@ -3,6 +3,7 @@ const User = require('../model/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('./verifyToken');
+const Company = require('../model/Company');
 
 const { registerValidation, loginValidation } = require('../validation');
 
@@ -65,7 +66,10 @@ router.get('/users', verifyToken, async (req, res) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem listar usuários.' });
         }
-        const users = await User.find().lean();
+        const users = await User.find().populate({
+            path: 'company',
+            select: 'name _id',
+        }).lean();
         res.json(users);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -92,7 +96,7 @@ router.put('/users/:id', verifyToken, async (req, res) => {
         }
 
         user.name = name || user.name;
-        user.email = req.body.email || user.email;
+        user.email = email || user.email;
         user.company = company || user.company;
         user.active = active !== undefined ? active : user.active;
 

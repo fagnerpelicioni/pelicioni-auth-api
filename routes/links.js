@@ -28,7 +28,7 @@ router.get('/links', verifyToken, async (req, res) => {
 });
 
 router.post('/links', verifyToken, async (req, res) => {
-    const { name, link, userEmail, company } = req.body;
+    const { name, link, userEmail, category } = req.body;
 
     try {
         if (req.user.role !== 'admin') {
@@ -39,7 +39,7 @@ router.post('/links', verifyToken, async (req, res) => {
         if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado!' });
 
         // Save the user's email in the Link document
-        const novoLink = new Link({ name, link, userEmail, company });
+        const novoLink = new Link({ name, link, userEmail, category });
         await novoLink.save();
         res.status(201).json(novoLink);
     } catch (err) {
